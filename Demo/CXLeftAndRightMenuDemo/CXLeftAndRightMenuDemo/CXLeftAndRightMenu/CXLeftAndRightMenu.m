@@ -104,9 +104,9 @@
 #pragma mark - Gesture Action
 -(void)tapAction:(UIGestureRecognizer*)gestureRecognizer
 {
-    NSLog(@"tapAction");
+   // NSLog(@"tapAction");
     CGPoint point = [gestureRecognizer locationInView:self.view];
-    NSLog(@"point.x = %f", point.x);
+   // NSLog(@"point.x = %f", point.x);
     
     if (_direction == CXMenuLeft) {
         if (point.x<KMenuWidth) {
@@ -127,16 +127,16 @@
     static CGPoint lastPoint;
     static CGPoint firstPoint;
     
-    NSLog(@"panAction");
+  //  NSLog(@"panAction");
     if (gestureRecognizer.state == UIGestureRecognizerStateBegan) {
-        NSLog(@"UIGestureRecognizerStateBegan");
+      //  NSLog(@"UIGestureRecognizerStateBegan");
         _direction = CXMenuNone;
         lastPoint = [gestureRecognizer locationInView:_rootController.view];
         firstPoint = lastPoint;
     }
     
     if (gestureRecognizer.state == UIGestureRecognizerStateChanged) {
-        NSLog(@"UIGestureRecognizerStateChanged");
+     //   NSLog(@"UIGestureRecognizerStateChanged");
         
         CGPoint point = [gestureRecognizer locationInView:_rootController.view];
         if(lastPoint.x <= point.x){
@@ -152,15 +152,15 @@
     }
     
     if (gestureRecognizer.state == UIGestureRecognizerStateEnded) {
-        NSLog(@"UIGestureRecognizerStateEnded");
+     //   NSLog(@"UIGestureRecognizerStateEnded");
         if(_direction != CXMenuNone){
             
             if(_direction == CXMenuLeft){
-                NSLog(@"direction = CXMenuLeft");
+              //  NSLog(@"direction = CXMenuLeft");
                 [self showLeftView];
             }
             else if(_direction == CXMenuRight){
-                NSLog(@"direction = CXMenuRight");
+              //  NSLog(@"direction = CXMenuRight");
                 [self showRightView];
             }
         }
@@ -198,6 +198,7 @@
 - (void)showLeftView
 {
     [_tap setEnabled:YES];
+    [_pan setEnabled:NO];
     
     [self showShadow:YES];
     
@@ -222,6 +223,7 @@
 - (void)showRightView
 {
     [_tap setEnabled:YES];
+    [_pan setEnabled:NO];
     
     [self showShadow:YES];
     
@@ -247,6 +249,7 @@
 - (void)showRootView
 {
     [self showShadow:NO];
+    [_pan setEnabled:YES];
     
     [UIView beginAnimations:nil context:nil];
     [UIView setAnimationDuration:0.5];

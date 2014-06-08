@@ -28,9 +28,12 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    if (_pan == nil) {
+    
+    if (_tap == nil) {
         UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapAction:)];
         [self.view addGestureRecognizer:tap];
+        [tap setEnabled:NO];
+        _tap = tap;
     }
 }
 
@@ -102,6 +105,20 @@
 -(void)tapAction:(UIGestureRecognizer*)gestureRecognizer
 {
     NSLog(@"tapAction");
+    CGPoint point = [gestureRecognizer locationInView:self.view];
+    NSLog(@"point.x = %f", point.x);
+    
+    if (_direction == CXMenuLeft) {
+        if (point.x<KMenuWidth) {
+            return;
+        }
+    }else if(_direction == CXMenuRight){
+        if (point.x>KMenuWidth) {
+            return;
+        }
+    }
+    
+    [self showRootView];
     [gestureRecognizer setEnabled:NO];
 }
 
@@ -124,26 +141,28 @@
         CGPoint point = [gestureRecognizer locationInView:_rootController.view];
         if(lastPoint.x <= point.x){
             _direction = CXMenuLeft;
-            //[self showMovingView:point.x-firstPoint.x];
         }else if(lastPoint.x >= point.x){
             _direction = CXMenuRight;
-           // [self showMovingView:point.x-firstPoint.x];
         }else{
             _direction = CXMenuNone;
         }
         
         lastPoint = point;
+        //[self showMovingView:firstPoint.x - point.x];
     }
     
     if (gestureRecognizer.state == UIGestureRecognizerStateEnded) {
         NSLog(@"UIGestureRecognizerStateEnded");
-        if(_direction == CXMenuLeft){
-            NSLog(@"direction = CXMenuLeft");
-            [self showLeftView];
-        }
-        else if(_direction == CXMenuRight){
-            NSLog(@"direction = CXMenuRight");
-            [self showRightView];
+        if(_direction != CXMenuNone){
+            
+            if(_direction == CXMenuLeft){
+                NSLog(@"direction = CXMenuLeft");
+                [self showLeftView];
+            }
+            else if(_direction == CXMenuRight){
+                NSLog(@"direction = CXMenuRight");
+                [self showRightView];
+            }
         }
         else{
             NSLog(@"direction = CXMenuNone");
@@ -160,13 +179,17 @@
     [UIView beginAnimations:nil context:nil];
     [UIView setAnimationDuration:0.5];
     
+    CGRect leftFram = _leftController.view.frame;
+    leftFram.origin.x = leftFram.origin.x + x;
+    _leftController.view.frame = leftFram;
+    
     CGRect rootFram = _rootController.view.frame;
-    rootFram.origin.x = x;
+    rootFram.origin.x = 0-KMenuWidth;
     _rootController.view.frame = rootFram;
     
-    CGRect leftFram = _leftController.view.frame;
-    leftFram.origin.x = x - KMenuWidth;
-    _leftController.view.frame = leftFram;
+    CGRect rightFram = _rightController.view.frame;
+    rightFram.origin.x = KScreenWidth-KMenuWidth;
+    _rightController.view.frame = rightFram;
     
     
     [UIView commitAnimations];
@@ -174,6 +197,10 @@
 
 - (void)showLeftView
 {
+    [_tap setEnabled:YES];
+    
+    [self showShadow:YES];
+    
     [UIView beginAnimations:nil context:nil];
     [UIView setAnimationDuration:0.5];
     
@@ -194,6 +221,10 @@
 
 - (void)showRightView
 {
+    [_tap setEnabled:YES];
+    
+    [self showShadow:YES];
+    
     [UIView beginAnimations:nil context:nil];
     [UIView setAnimationDuration:0.5];
     
@@ -210,6 +241,42 @@
     _rightController.view.frame = rightFram;
     
     [UIView commitAnimations];
+}
+
+
+- (void)showRootView
+{
+    [self showShadow:NO];
+    
+    [UIView beginAnimations:nil context:nil];
+    [UIView setAnimationDuration:0.5];
+    
+    CGRect leftFram = _leftController.view.frame;
+    leftFram.origin.x = 0-KMenuWidth;
+    _leftController.view.frame = leftFram;
+    
+    CGRect rootFram = _rootController.view.frame;
+    rootFram.origin.x = 0;
+    _rootController.view.frame = rootFram;
+    
+    CGRect rightFram = _rightController.view.frame;
+    rightFram.origin.x = KScreenWidth;
+    _rightController.view.frame = rightFram;
+    
+    [UIView commitAnimations];
+}
+
+- (void)showShadow:(BOOL)shadow {
+    if (!_rootController) return;
+    
+    _rootController.view.layer.shadowOpacity = shadow ? 0.2f : 0.0f;
+    if (shadow) {
+        _rootController.view.layer.cornerRadius = 4.0f;
+        _rootController.view.layer.shadowOffset = CGSizeZero;
+        _rootController.view.layer.shadowRadius = 4.0f;
+        _rootController.view.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.view.bounds].CGPath;
+    }
+    
 }
 
 
